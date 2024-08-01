@@ -33,8 +33,12 @@ namespace University.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .FirstOrDefaultAsync(m => m.Id == id);
+            //var student = await _context.Students.FirstOrDefaultAsync(m => m.Id == id);
+            // Agrega las inscripciones y los cursos
+            var student = await _context.Students.Include(s => s.Enrollments) // Incluir las incripciones
+                          .ThenInclude(e => e.Course) // Luego incluir los cursos
+                          .AsNoTracking()   // Mejora el rendimiento si no se actualizan las entidades
+                          .FirstOrDefaultAsync(m => m.Id == id);
             if (student == null)
             {
                 return NotFound();
@@ -54,13 +58,19 @@ namespace University.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,LastName,Surname,EnrollmentDate")] Student student)
+        public async Task<IActionResult> Create([Bind("LastName,Surname,EnrollmentDate")] Student student)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(student);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(student);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }  catch (DbUpdateException /* ex */) {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(student);
         }
@@ -100,16 +110,10 @@ namespace University.Controllers
                     _context.Update(student);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException /*DbUpdateConcurrencyException*/)
                 {
-                    if (!StudentExists(student.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    //Log the error (uncomment ex variable name and write a log.)
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -117,7 +121,8 @@ namespace University.Controllers
         }
 
         // GET: Student/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
+        //public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -125,10 +130,17 @@ namespace University.Controllers
             }
 
             var student = await _context.Students
+                .AsNoTracking() // new
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (student == null)
+            /*if (student == null)
             {
                 return NotFound();
+            }*/
+             if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] =
+                    "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
             }
 
             return View(student);
