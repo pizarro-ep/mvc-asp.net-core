@@ -1,4 +1,4 @@
-App
+Web
 
 Un pequeño proyecto para practicar la creacion de web sencilla que consume la Api creada anteriormente con ASP.NET CORE Y C#
 

@@ -1,4 +1,4 @@
-App
+Api
 
 Un pequeño proyecto para practicar la creacion de apis web con ASP.NET CORE Y C#
 
