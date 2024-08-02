@@ -22,7 +22,10 @@ namespace University.Controllers
         // GET: Course
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Courses.ToListAsync());
+            // incluye cursos relacionados
+            var courses = _context.Courses.Include(c => c.Department).AsNoTracking();
+            return View(await courses.ToListAsync());
+            //return View(await _context.Courses.ToListAsync());
         }
 
         // GET: Course/Details/5
@@ -33,8 +36,8 @@ namespace University.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+            // var course = await _context.Courses.FirstOrDefaultAsync(m => m.CourseID == id);
+            var course = await _context.Courses.Include(c => c.Department).AsNoTracking().FirstOrDefaultAsync(m => m.CourseID == id); 
             if (course == null)
             {
                 return NotFound();
@@ -46,6 +49,7 @@ namespace University.Controllers
         // GET: Course/Create
         public IActionResult Create()
         {
+            PopulateDepartmentsDropDownList(); //add
             return View();
         }
 
@@ -54,7 +58,8 @@ namespace University.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseID,Title,Credits")] Course course)
+        public async Task<IActionResult> Create([Bind("CourseID,Title,Credits,DepartmentID")] Course course)
+        //public async Task<IActionResult> Create([Bind("CourseID,Title,Credits")] Course course)
         {
             if (ModelState.IsValid)
             {
@@ -62,6 +67,14 @@ namespace University.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            /*else{
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
+                    ModelState.AddModelError("", error.ErrorMessage);
+                }
+            } */ 
+            PopulateDepartmentsDropDownList(course.DepartmentID); //add
             return View(course);
         }
 
@@ -73,11 +86,14 @@ namespace University.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
+            //var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses.AsNoTracking().FirstOrDefaultAsync(m => m.CourseID == id);
             if (course == null)
             {
                 return NotFound();
             }
+            PopulateDepartmentsDropDownList(course.DepartmentID); // add
+            
             return View(course);
         }
 
@@ -92,27 +108,27 @@ namespace University.Controllers
             {
                 return NotFound();
             }
+            
+            var courseToUpdate = await _context.Courses.FirstOrDefaultAsync(c => c.CourseID == id); // add
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
+            if (await TryUpdateModelAsync<Course>(courseToUpdate, "", c => c.Credits, c => c.DepartmentID, c => c.Title))
             {
                 try
                 {
-                    _context.Update(course);
+                    //_context.Update(course);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException /*DbUpdateConcurrencyException*/)
                 {
-                    if (!CourseExists(course.CourseID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    //Log the error (uncomment ex variable name and write a log.)
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator."); // add
+                    /* if (!CourseExists(course.CourseID)) return NotFound(); 
+                    else throw; */
                 }
                 return RedirectToAction(nameof(Index));
             }
+            PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID); // add
             return View(course);
         }
 
@@ -124,8 +140,8 @@ namespace University.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+            //var course = await _context.Courses.FirstOrDefaultAsync(m => m.CourseID == id);
+            var course = await _context.Courses.Include(c => c.Department).AsNoTracking().FirstOrDefaultAsync(m => m.CourseID == id);
             if (course == null)
             {
                 return NotFound();
@@ -152,6 +168,14 @@ namespace University.Controllers
         private bool CourseExists(int id)
         {
             return _context.Courses.Any(e => e.CourseID == id);
+        }
+
+        // Construir el select para los departamentos
+        private void PopulateDepartmentsDropDownList(object selectedDepartment = null){
+            var departmensQuery = from d in _context.Departments
+                                  orderby d.Name
+                                  select d;
+            ViewBag.DepartmentID = new SelectList(departmensQuery.AsNoTracking(), "DepartmentID", "Name", selectedDepartment);
         }
     }
 }

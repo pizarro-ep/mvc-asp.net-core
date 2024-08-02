@@ -20,9 +20,37 @@ namespace University.Controllers
         }
 
         // GET: Student
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string search, int? pageNumber)
+        //public async Task<IActionResult> Index(string sortOrder, string search)
+        //public async Task<IActionResult> Index(string sortOrder)
         {
-            return View(await _context.Students.ToListAsync());
+            // Ordenamiento, busqueda y filtro de datos par mostrar en la tabla
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            
+            if(search !=null){ pageNumber = 1; } else { search = currentFilter; }
+
+            // para filtros de busqueda
+            ViewData["CurrentFilter"] = search;
+
+            var students = from s in _context.Students
+                           select s;
+            
+            if (!string.IsNullOrEmpty(search)){
+                students = students.Where(w => w.LastName.Contains(search) || w.Surname.Contains(search));
+            }
+
+            switch(sortOrder){
+                case "name_desc": students = students.OrderByDescending(s => s.LastName); break;
+                case "Date": students = students.OrderBy(s => s.EnrollmentDate); break;
+                case "date_desc": students = students.OrderByDescending(s => s.EnrollmentDate); break;
+                default: students = students.OrderBy(s => s.LastName); break;
+            }
+            int pageSize = 3;
+            return View(await PaginatedList<Student>.CreateAsync(students.AsNoTracking(), pageNumber ?? 1, pageSize));
+            //return View(await students.AsNoTracking().ToListAsync());
+            //return View(await _context.Students.ToListAsync());
         }
 
         // GET: Student/Details/5
@@ -139,8 +167,7 @@ namespace University.Controllers
              if (saveChangesError.GetValueOrDefault())
             {
                 ViewData["ErrorMessage"] =
-                    "Delete failed. Try again, and if the problem persists " +
-                    "see your system administrator.";
+                    "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
 
             return View(student);
@@ -152,13 +179,20 @@ namespace University.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var student = await _context.Students.FindAsync(id);
-            if (student != null)
+            //if (student != null)
+            if (student == null)
             {
+                // _context.Students.Remove(student);
+                return RedirectToAction(nameof(Index));
+            }
+            try{
                 _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }catch (DbUpdateException){
+                return RedirectToAction(nameof(Delete), new {id = id, saveChangesError = true});
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool StudentExists(int id)

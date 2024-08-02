@@ -9,6 +9,7 @@ dotnet add package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
 dotnet add package Microsoft.EntityFrameworkCore.Sqlite
 dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design
 dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet tool install --global dotnet-ef
 #######################################################################
 
 #####################################################################
@@ -19,7 +20,8 @@ dotnet aspnet-codegenerator controller -name <ControllerNatoToCreate>
 #####################################################################
 
 ######################################
-CREAR MIGRACIÓN ######################
+Migraciones MIGRACIÓN ######################
 dotnet ef migrations add InitialCreate
 dotnet ef database update
+dotnet ef database drop
 ######################################
