@@ -1,0 +1,113 @@
+<!-- model IEnumerable<BooksManagment.Models.Book> -->
+@model PaginatedList<BooksManagment.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form asp-action="Index" method="get">
+    <div class="form-controls no-color">
+        <p>
+            Buscar:
+            <input type="text" name="Search" value="@ViewData["CurrenteFilter"]">
+            <input type="submit" value="Buscar" class="btn btn-sm btn-primary">
+            <a asp-action="Index">Volver a la lista completa</a>
+        </p>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Html.DisplayNameFor(model => model.First().Title)
+                </a>
+            </th>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Description)
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PublicationSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Html.DisplayNameFor(model => model.First().PublicationDate)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["GenreSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Html.DisplayNameFor(model => model.First().Genre)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["AuthorSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Html.DisplayNameFor(model => model.First().Author)
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PublicationDate)
+            </td>
+            <td>
+                @(item.Genre != null ? item.Genre.Name : "")
+            </td>
+            <td>
+                @(item.Author != null ? item.Author.Names : "")
+            </td>
+            <td class="d-flex justify-content-around">
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning fs-5"><i class="bi bi-pencil-square"></i></a> 
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info fs-5"><i class="bi bi-list-columns-reverse"></i></a> 
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger fs-5"><i class="bi bi-trash-fill"></i></a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "" ;
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<div>
+    <ul class="pagination">
+        <li class="page-item">
+            <a asp-action="Index" 
+                asp-route-sortOrder="@ViewData["CurrentSort"]" 
+                asp-route-pageNumber="@(Model.PageIndex - 1)"
+                asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                class="btn btn-default @prevDisabled">
+                &laquo;
+            </a>
+        </li>        
+        <li class="page-item active">
+            <a class="page-link" href="#">@(Model.PageIndex)</a>
+        </li>
+        <li class="page-item">
+            <a asp-action="Index"
+                asp-route-sortOrder="@ViewData["CurrentSort"]"
+                asp-route-pageNumber="@(Model.PageIndex + 1)"
+                asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                class="btn btn-defult @nextDisabled">
+                &raquo;
+            </a>
+        </li>
+    </ul>
+</div>

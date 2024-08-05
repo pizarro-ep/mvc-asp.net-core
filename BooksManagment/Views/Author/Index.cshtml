@@ -1,0 +1,53 @@
+@model IEnumerable<BooksManagment.Models.Author>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Crear nuevo</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Names)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Surnames)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Biography)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BirthDate)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Names)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Surnames)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Biography)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BirthDate)
+            </td>
+            <td class="d-flex justify-content-around">
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning fs-5"><i class="bi bi-pencil-square"></i></a> 
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info fs-5"><i class="bi bi-list-columns-reverse"></i></a> 
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger fs-5"><i class="bi bi-trash-fill"></i></a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
