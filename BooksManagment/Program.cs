@@ -1,7 +1,8 @@
-using BooksManagment.Models;
-using BooksManagment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using BooksManagment.Models;
+using BooksManagment.Data;
+using BooksManagment.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +12,41 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder
 // Configurar el filtro de excepciones de base de datos para entornos de desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Registrar UserService
+builder.Services.AddScoped<UserService>();
+
+// AUTENTICATE
+// Configurar la autenticacion de cookies
+builder.Services.AddAuthentication("CookieAuthentication").AddCookie("CookieAuthentication", config => {
+    config.Cookie.Name = "UserLoginCookie"; // Nombre del cookie
+    config.LoginPath = "/Account/Login"; // Ruta para el inicio de sesión
+});
+/*
+// Configurar Identity - drop
+builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+// Configurar autenticación y autorización
+builder.Services.AddAuthentication();
+*/
+// configurar la autorización
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("AuthenticationUser", policy => policy.RequireAuthenticatedUser());
+    //options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    //options.AddPolicy("RequireNormalRole", policy => policy.RequireRole("Normal"));
+    //options.AddPolicy("RequireInvitadoRole", policy => policy.RequireRole("Invitado"));
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+/*/ Seed Data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    await SeedData.Initialize(services, userManager);
+}*/
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -29,6 +61,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Configurar autenticación y autorización
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

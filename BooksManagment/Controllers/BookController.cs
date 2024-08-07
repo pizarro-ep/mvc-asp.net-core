@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BooksManagment.Data;
 using BooksManagment.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BooksManagment.Controllers
 {
+    //[Authorize]
     public class BookController : Controller
     {
         private readonly AppDbContext _context;
@@ -45,7 +47,10 @@ namespace BooksManagment.Controllers
                            select s;
 
             if (!string.IsNullOrEmpty(search)){ // Si hay un parametro realizar busqueda
-                books = books.Where(w => w.Title.Contains(search) || w.Description.Contains(search) || w.Genre.Name.Contains(search) || w.Author.Names.Contains(search));
+                books = books.Where(w => w.Title.Contains(search) ||
+                        (w.Description != null && w.Description.Contains(search)) ||
+                        (w.Genre != null && w.Genre.Name != null && w.Genre.Name.Contains(search)) ||
+                        (w.Author != null && w.Author.Names != null && w.Author.Names.Contains(search)));
             }
 
             // casos de ordenamiento
@@ -53,10 +58,10 @@ namespace BooksManagment.Controllers
                 case "title_desc": books = books.OrderByDescending(s => s.Title); break;
                 case "Publication": books = books.OrderBy(s => s.PublicationDate); break;
                 case "publication_desc": books = books.OrderByDescending(s => s.PublicationDate); break;
-                case "Genre": books = books.OrderBy(s => s.Genre.Name); break;
-                case "genre_desc": books = books.OrderByDescending(s => s.Genre.Name); break;
-                case "Author": books = books.OrderBy(s => s.Author.Names); break;
-                case "author_desc": books = books.OrderByDescending(s => s.Author.Names); break;
+                case "Genre": books = books.OrderBy(s => (s.Genre != null ? s.Genre.Name : string.Empty)); break;
+                case "genre_desc": books = books.OrderByDescending(s => s.Genre != null ? s.Genre.Name : string.Empty); break;
+                case "Author": books = books.OrderBy(s => s.Author != null ? s.Author.Names : string.Empty); break;
+                case "author_desc": books = books.OrderByDescending(s => s.Author != null ? s.Author.Names :string.Empty); break;
                 default: books = books.OrderBy(s => s.Title); break;
             }
             int pageSize = 5;       // Cantidad de items en la pagina

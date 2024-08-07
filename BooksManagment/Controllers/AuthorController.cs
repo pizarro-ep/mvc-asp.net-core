@@ -33,8 +33,7 @@ namespace BooksManagment.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var author = await _context.Authors.FirstOrDefaultAsync(m => m.Id == id);
             if (author == null)
             {
                 return NotFound();

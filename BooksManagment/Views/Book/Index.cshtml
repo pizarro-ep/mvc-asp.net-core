@@ -15,7 +15,7 @@
     <div class="form-controls no-color">
         <p>
             Buscar:
-            <input type="text" name="Search" value="@ViewData["CurrenteFilter"]">
+            <input type="text" name="Search" value="@ViewData["CurrentFilter"]">
             <input type="submit" value="Buscar" class="btn btn-sm btn-primary">
             <a asp-action="Index">Volver a la lista completa</a>
         </p>
@@ -93,19 +93,28 @@
                 asp-route-sortOrder="@ViewData["CurrentSort"]" 
                 asp-route-pageNumber="@(Model.PageIndex - 1)"
                 asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                class="btn btn-default @prevDisabled">
+                class="page-link @prevDisabled">
                 &laquo;
             </a>
-        </li>        
-        <li class="page-item active">
-            <a class="page-link" href="#">@(Model.PageIndex)</a>
-        </li>
+        </li> 
+        @for(int i = 1; i<= Model.TotalPages; i++)       {
+            var isActive = Model.PageIndex == i ? "active" : "";
+            <li class="page-item @isActive">
+                <a  asp-action="Index"
+                    asp-route-sortOrder="@ViewData["CurrentSort"]"
+                    asp-route-pageNumber="@i"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                    class="page-link">
+                    @(i)
+                </a>
+            </li>
+        }
         <li class="page-item">
             <a asp-action="Index"
                 asp-route-sortOrder="@ViewData["CurrentSort"]"
                 asp-route-pageNumber="@(Model.PageIndex + 1)"
                 asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                class="btn btn-defult @nextDisabled">
+                class="page-link @nextDisabled">
                 &raquo;
             </a>
         </li>
