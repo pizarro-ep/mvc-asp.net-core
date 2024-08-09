@@ -1,0 +1,17 @@
+@model ErrorViewModel
+
+@{
+    ViewData["Title"] = "Error";
+}
+
+@if (ViewBag.ErrorTitle == null) {
+    <h3 class="text-danger">
+        Se produjo un error al procesar su solicitud. Se notifica al equipo de soporte y estamos trabajando en la solución.
+    </h3>
+    <h5>En caso de urgencia, contáctenos en info@example.com</h5>
+}
+else {
+
+    <h1 class="text-danger">@ViewBag.ErrorTitle</h1>
+    <h6 class="text-danger">@ViewBag.ErrorMessage</h6>
+}

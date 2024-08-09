@@ -37,6 +37,10 @@ namespace SocialMedia.Controllers
 
                 // Si el usuario fue creado correctamente, iniciar sesión y redireccionar al home
                 if (result.Succeeded) {
+                    // Verificar si el usuario es un administrador y redireccionar a la lista de usuarios
+                    if(_signInManager.IsSignedIn(User) && User.IsInRole("Administrador")) {
+                        return RedirectToAction("ListUsers", "Administration");
+                    }
                     // Se ha iniciado sesión para el usuario
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");

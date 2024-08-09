@@ -38,12 +38,32 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vRWRpdFJvbGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/workspaces/codespaces-blank/SocialMedia/Views/Administration/EditUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vRWRpdFVzZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/workspaces/codespaces-blank/SocialMedia/Views/Administration/EditUsersInRole.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vRWRpdFVzZXJzSW5Sb2xlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/codespaces-blank/SocialMedia/Views/Administration/ListRoles.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vTGlzdFJvbGVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/codespaces-blank/SocialMedia/Views/Administration/ListUsers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vTGlzdFVzZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/codespaces-blank/SocialMedia/Views/Administration/ManageUserClaims.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vTWFuYWdlVXNlckNsYWltcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/codespaces-blank/SocialMedia/Views/Administration/ManageUserRoles.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5pc3RyYXRpb24vTWFuYWdlVXNlclJvbGVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/codespaces-blank/SocialMedia/Views/Error/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXJyb3IvRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/codespaces-blank/SocialMedia/Views/Home/Index.cshtml]
@@ -64,6 +84,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/workspaces/codespaces-blank/SocialMedia/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/codespaces-blank/SocialMedia/Views/Shared/NotFound.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL05vdEZvdW5kLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/codespaces-blank/SocialMedia/Views/Shared/_ValidationScriptsPartial.cshtml]

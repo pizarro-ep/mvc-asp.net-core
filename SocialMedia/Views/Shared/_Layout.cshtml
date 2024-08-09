@@ -36,10 +36,16 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NonSecuredMethod">No Seguro</a>
                         </li>
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("Administrador")) {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Administration" asp-action="ListRoles">
-                                    Gestión de roles
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Gestión
                                 </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <a class="dropdown-item" asp-controller="Administration"
+                                       asp-action="ListUsers">Usuarios</a>
+                                    <a class="dropdown-item" asp-controller="Administration"
+                                       asp-action="ListRoles">Roles</a>
+                                </ul>
                             </li>
                         }
                     </ul>

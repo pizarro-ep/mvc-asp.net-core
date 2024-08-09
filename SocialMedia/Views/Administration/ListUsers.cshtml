@@ -1,0 +1,63 @@
+@model IEnumerable<ApplicationUser>
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+<h1>Usuarios</h1>
+
+@if (Model.Any())
+{
+    <a asp-action="Register" asp-controller="Account"
+       class="btn btn-primary mb-3" style="width:auto">
+        Agregar usuario
+    </a>
+
+    foreach (var user in Model) {
+        <div class="card mb-3">
+            <div class="card-header">
+                User Id : @user.Id
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">@user.UserName</h5>
+            </div>
+            <div class="card-footer">
+                <form method="post" asp-action="DeleteUser" asp-route-UserId="@user.Id">
+                    <a asp-action="EditUser" asp-controller="Administration" asp-route-id="@user.Id" class="btn btn-warning">Editar</a>
+                    <span id="confirmDeleteSpan_@user.Id" style="display:none">
+                        <span>¿Estás seguro de que quieres eliminar?</span>
+                        <button type="submit" class="btn btn-danger">Sí</button>
+                        <a href="#" class="btn btn-success"
+                           onclick="confirmDelete('@user.Id', false)">No</a>
+                    </span>
+                    <span id="deleteSpan_@user.Id">
+                        <a href="#" class="btn btn-danger"
+                           onclick="confirmDelete('@user.Id', true)">Eliminar</a>
+                    </span>
+                </form>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            No hay usuarios registrados.
+        </div>
+    </div>
+}
+
+<script>
+    function confirmDelete(uniqueId, isDeleteClicked) {
+        var deleteSpan = 'deleteSpan_' + uniqueId;
+        var confirmDeleteSpan = 'confirmDeleteSpan_' + uniqueId;
+        if (isDeleteClicked) {
+            $('#' + deleteSpan).hide();
+            $('#' + confirmDeleteSpan).show();
+        } else {
+            $('#' + deleteSpan).show();
+            $('#' + confirmDeleteSpan).hide();
+        }
+    }
+</script>

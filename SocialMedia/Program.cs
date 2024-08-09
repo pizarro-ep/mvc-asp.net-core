@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,16 +30,24 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddAuthorization(options => { 
+    options.AddPolicy("EditRolePolicy", policy => policy.RequireClaim("Editar Rol"));
+    options.AddPolicy("CreateRolePolicy", policy => policy.RequireClaim("Crear Rol"));
+    options.AddPolicy("DeleteRolePolicy",  policy => policy.RequireClaim("Eliminar Rol");
+});
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+if (app.Environment.IsDevelopment()){
+    app.UseDeveloperExceptionPage();
 }
+else{
+    app.UseExceptionHandler("/Error");
+    app.UseStatusCodePagesWithReExecute("/Error/{0}");
+}
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
