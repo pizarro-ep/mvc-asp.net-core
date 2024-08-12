@@ -53,9 +53,27 @@
         </div>
         <div class="card-footer">
             <a asp-action="EditUsersInRole" asp-route-id="@Model.Id" class="btn btn-success">
-                Agregar a este rol
+                Agregar o remover usuarios de este rol
             </a>
-
+        </div>
+    </div>
+    <div class="card mt-3">
+        <div class="card-header">
+            <h3>Role Claims</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.Claims != null && Model.Claims.Any()){
+                foreach (var claim in Model.Claims) {
+                    <h5 class="card-title">@claim</h5>
+                }
+            }else {
+                <h5 class="card-title">No existe ninguno por el momento</h5>
+            }
+        </div>
+        <div class="card-footer">
+            <a asp-action="ManageRoleClaims" asp-controller="Administration" asp-route-id="@Model.Id" class="btn btn-info">
+                Manage Claims
+            </a>
         </div>
     </div>
 

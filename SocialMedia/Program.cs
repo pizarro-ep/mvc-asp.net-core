@@ -33,7 +33,7 @@ builder.Services.ConfigureApplicationCookie(options => {
 builder.Services.AddAuthorization(options => { 
     options.AddPolicy("EditRolePolicy", policy => policy.RequireClaim("Editar Rol"));
     options.AddPolicy("CreateRolePolicy", policy => policy.RequireClaim("Crear Rol"));
-    options.AddPolicy("DeleteRolePolicy",  policy => policy.RequireClaim("Eliminar Rol");
+    options.AddPolicy("DeleteRolePolicy",  policy => policy.RequireClaim("Eliminar Rol"));
 });
 
 

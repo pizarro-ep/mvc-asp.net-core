@@ -12,10 +12,12 @@ using SocialMedia.Models;
 namespace SocialMedia.Controllers{
    [Authorize(Roles = "Administrador")] // [Authorize(Roles = "Administrator, Moderador, ...")] [Authorize(Roles = "Administrator] [Authorize(Roles = "Moderador")] [Authorize(Roles = "Moderador")] [Authorize(Roles = "Moderador")] [Authorize(Roles = "Mod
     public class AdministrationController : Controller{
+        private readonly IAuthorizationService _authorizationService;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdministrationController(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager){
+        public AdministrationController(IAuthorizationService authorizationService, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager){
+            _authorizationService = authorizationService;
             _roleManager = roleManager;
             _userManager = userManager;
         }
@@ -54,7 +56,18 @@ namespace SocialMedia.Controllers{
         public async Task<IActionResult> ListRoles() {
             // Obtener todos los roles de la base de datos y mostrarlos en la vista 
             List<ApplicationRole> roles = await _roleManager.Roles.ToListAsync();
-            return View(roles);
+
+            // Verificar si el usuario tiene permisos para editar y eliminar roles
+            var canEdit = await _authorizationService.AuthorizeAsync(User, "EditRolePolicy");
+            var canDelete = await _authorizationService.AuthorizeAsync(User, "DeleteRolePolicy");
+            // Crear un modelo de vista para mostrar los roles y otros detalles que deseas mostrar
+            var viewModel = new RoleViewModel{
+                Roles = roles,
+                CanEdit = canEdit.Succeeded,
+                CanDelete = canDelete.Succeeded
+            };
+
+            return View(viewModel);
         }
 
         [HttpGet]
@@ -69,9 +82,17 @@ namespace SocialMedia.Controllers{
                 Id = role.Id, 
                 RoleName = role.Name ?? string.Empty,
                 Description = role.Description ?? string.Empty,
-                Users = new List<string>()
+                //Users = new List<string>()
                 // Puedes agregar otras propiedades aquí si es necesario
             };
+            // Agregar los usuarios y los claims al modelo si es necesario
+            model.Users = new List<string>();
+            model.Claims = new List<string>();
+
+            // Obtener los claims del rol y agregarlos al modelo
+            var roleClaims = await _roleManager.GetClaimsAsync(role);
+            model.Claims = roleClaims.Select(c => c.Value).ToList();
+
             foreach(var user in await _userManager.Users.ToListAsync()) {
                 // Agregar los usuarios que están en este rol a la lista de usuarios
                 if(await _userManager.IsInRoleAsync(user, role.Name ?? string.Empty)) {
@@ -83,6 +104,7 @@ namespace SocialMedia.Controllers{
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> EditRole(EditRoleViewModel model) {
             if(ModelState.IsValid) {
                 // Obtener el rol de la base de datos
@@ -225,6 +247,7 @@ namespace SocialMedia.Controllers{
         }
 
         [HttpGet]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> EditUser(string id){
             // Obtener el usuario de la base de datos por su ID
             var user = await _userManager.FindByIdAsync(id);
@@ -250,6 +273,7 @@ namespace SocialMedia.Controllers{
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> EditUser(EditUserViewModel model) {
             // Obtener el usuario de la base de datos por su ID
             var user = await _userManager.FindByIdAsync(model.Id);
@@ -276,6 +300,7 @@ namespace SocialMedia.Controllers{
         }
 
         [HttpPost]
+        [Authorize(Policy = "DeleteRolePolicy")]
         public async Task<IActionResult> DeleteUser(string id) {
             // Obtener el usuario de la base de datos por su ID
             var user = await _userManager.FindByIdAsync(id);
@@ -406,6 +431,64 @@ namespace SocialMedia.Controllers{
                 }
             }
             return RedirectToAction("EditUser", new {id = id});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageRoleClaims(string id){
+            var role = await _roleManager.FindByIdAsync(id);
+            if(role == null) { // El rol no fue encontrado
+                ViewBag.ErrorMessage = $"El rol con el ID: {id} no fue encontrado.";
+                return View("NotFound");
+            }
+            // Crear un modelo de vista para mostrar los claims del rol
+            ViewBag.RoleName = role.Name;
+            var model = new RoleClaimsViewModel {
+                RoleId = role.Id,
+            };
+            // Agregar todos los claims a la lista de claims
+            var existingRoleClaims = await _roleManager.GetClaimsAsync(role);
+            foreach(Claim claim in ClaimsStore.GetAllClaims()){
+                // Crear un modelo de vista para cada claim en el rol actualizado
+                RoleClaim roleClaim = new RoleClaim {ClaimType = claim.Type};
+                // Verificar si el rol tiene este claim y seleccionarlo
+                if(existingRoleClaims.Any(c => c.Type == claim.Type)){
+                    roleClaim.IsSelected = true;
+                }
+                // Agregar el modelo de vista para cada claim
+                model.Claims.Add(roleClaim);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageRoleClaims(RoleClaimsViewModel model, string id){
+            var role = await _roleManager.FindByIdAsync(id);
+            if(role == null) { // El rol no fue encontrado
+                ViewBag.ErrorMessage = $"El rol con el ID: {id} no fue encontrado.";
+                return View("NotFound");
+            }
+            // Obtener todos los claims del rol
+            var claims = await _roleManager.GetClaimsAsync(role);
+            // Eliminar todos los claims del rol y agregar los nuevos claims
+            for (var i = 0; i < model.Claims.Count; i++) {
+                Claim claim = new Claim(model.Claims[i].ClaimType, model.Claims[i].ClaimType);
+                IdentityResult? result;
+                // Agregar el claim al rol si es necesario
+                if(model.Claims[i].IsSelected && !(claims.Any(c => c.Type == claim.Type))){
+                    result = await _roleManager.AddClaimAsync(role, claim);
+                }else if(!model.Claims[i].IsSelected && claims.Any(c => c.Type == claim.Type)){
+                    result = await _roleManager.RemoveClaimAsync(role, claim);
+                }else { continue; }
+                // Mostrar un mensaje de error si hubo un problema al agregar o eliminar el claim del rol
+                if(result.Succeeded){
+                    if(i < (model.Claims.Count - 1)){continue;}
+                    else { return RedirectToAction("EditRole", new { id = id }); }
+                }else{
+                    ModelState.AddModelError("", "Hubo un problema al agregar o eliminar los claims del rol.");
+                    return View(model);
+                }
+            }
+            return RedirectToAction("EditRole", new { id = id });
         }
     }
 }

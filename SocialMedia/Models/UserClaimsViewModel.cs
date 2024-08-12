@@ -3,7 +3,7 @@ namespace SocialMedia.Models{
         public UserClaimsViewModel(){
             Claims = new List<UserClaim>();
         }
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public List<UserClaim> Claims { get; set; }
     }    
 }

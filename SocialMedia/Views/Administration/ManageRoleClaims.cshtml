@@ -1,0 +1,32 @@
+@model RoleClaimsViewModel
+
+@{
+    ViewBag.Title = "Manage Role Claims";
+}
+
+<form method="post" asp-controller="Administration" asp-action="ManageRoleClaims">
+    <div class="card">
+        <div class="card-header">
+            <h2>Manage Role Claims</h2>
+            <h2>Role Name: @ViewBag.RoleName</h2>
+        </div>
+        <div class="card-body">
+            <input type="hidden" asp-for="@Model.RoleId" />
+            @for (int i = 0; i < Model.Claims.Count; i++)
+            {
+                <div class="form-check m-1">
+                    <input type="hidden" asp-for="@Model.Claims[i].ClaimType" />
+                    <input asp-for="@Model.Claims[i].IsSelected" class="form-check-input" />
+                    <label class="form-check-label" asp-for="@Model.Claims[i].IsSelected">
+                        @Model.Claims[i].ClaimType
+                    </label>
+                </div>
+            }
+            <div asp-validation-summary="All" class="text-danger"></div>
+        </div>
+        <div class="card-footer">
+            <input type="submit" value="Actualizar" class="btn btn-warning" />
+            <a asp-action="EditRole" asp-route-id="@Model.RoleId"  class="btn btn-outline-danger">Cancelar</a>
+        </div>
+    </div>
+</form>
